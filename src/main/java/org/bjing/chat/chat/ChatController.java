@@ -43,9 +43,6 @@ public class ChatController {
                                                               @RequestParam(value = "file", required = false) MultipartFile file,
                                                               Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        System.out.println(request);
-        System.out.println(file);
-        return ResponseEntity.ok(null);
-//        return ResponseEntity.ok(this.chatService.sendMessage(id, user.getId(), request.getContent()));
+        return ResponseEntity.ok(this.chatService.sendMessage(new MessageCreateDto(user.getId(), id, request.getContent(), file)));
     }
 }

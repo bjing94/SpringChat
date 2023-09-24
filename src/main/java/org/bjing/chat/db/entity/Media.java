@@ -1,10 +1,8 @@
 package org.bjing.chat.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,7 +11,8 @@ import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 @Entity(name = "media")
 public class Media {
@@ -26,10 +25,12 @@ public class Media {
 
     @ManyToOne
     @JoinColumn(name = "message_id" )
+    @JsonIgnore
     private Message message;
 
     @ManyToOne
     @JoinColumn(name = "chat_id" )
+    @JsonIgnore
     private Chat chat;
 
     @CreationTimestamp
