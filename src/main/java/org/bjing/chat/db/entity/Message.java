@@ -34,11 +34,11 @@ public class Message {
     @Column(columnDefinition = "VARCHAR(1024)", length = 1024)
     String content;
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", cascade = CascadeType.PERSIST)
     private Set<Media> mediaFiles = new HashSet<>();
 
     @CreationTimestamp
-    @Column(name = "created",nullable = false,updatable = false)
+    @Column(name = "created", nullable = false, updatable = false)
     private Date created;
 
     @UpdateTimestamp

@@ -1,20 +1,21 @@
 package org.bjing.chat.chat;
 
 import lombok.AllArgsConstructor;
-import org.bjing.chat.chat.dto.ChatCreateRequest;
-import org.bjing.chat.chat.dto.ChatCreateResponse;
-import org.bjing.chat.chat.dto.ChatResponse;
-import org.bjing.chat.chat.dto.MessageCreatedResponse;
+import org.bjing.chat.chat.dto.*;
 import org.bjing.chat.chat.mapper.MessageResponseMapper;
 import org.bjing.chat.db.entity.Chat;
 import org.bjing.chat.db.entity.Media;
 import org.bjing.chat.db.entity.Message;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.ChatRepository;
+import org.bjing.chat.db.repository.MediaRepository;
 import org.bjing.chat.db.repository.MessageRepository;
 import org.bjing.chat.db.repository.UserRepository;
+import org.bjing.chat.file.FileCreatedResponse;
+import org.bjing.chat.file.FileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -27,6 +28,10 @@ public class ChatService {
     private UserRepository userRepository;
 
     private MessageRepository messageRepository;
+
+    private MediaRepository mediaRepository;
+
+    private FileService fileService;
 
     public ChatCreateResponse create(ChatCreateRequest request, String creatorUUID) {
         List<String> userIds = request.getUserIds();
@@ -76,8 +81,12 @@ public class ChatService {
                 .build();
     }
 
-    //    TODO: Send messages with images
-    public MessageCreatedResponse sendMessage(String chatId, String userId, String message) {
+    public MessageCreatedResponse sendMessage(MessageCreateDto dto) {
+        String chatId = dto.getChatId();
+        String userId = dto.getUserId();
+        String content = dto.getContent();
+        MultipartFile file = dto.getFile();
+
         Optional<Chat> optionalChat = this.chatRepository.findById(chatId);
         Optional<User> optionalUser = this.userRepository.findById(userId);
         if (optionalChat.isEmpty()) {
@@ -92,14 +101,32 @@ public class ChatService {
         User user = optionalUser.get();
 
         this.checkChatAccess(chat, user.getId());
+        Set<Media> mediaFiles = new HashSet<>();
+
 
         Message messageEntity = Message.builder()
                 .chat(chat)
                 .user(user)
-                .content(message)
+                .content(content)
                 .build();
 
+        if (!file.isEmpty()) {
+            FileCreatedResponse data = this.fileService.saveFileLocally(file);
+
+            Media media = Media.builder()
+                    .link(data.getLink())
+                    .chat(chat)
+                    .message(messageEntity)
+                    .build();
+
+            mediaFiles.add(media);
+        }
+
+        messageEntity.setMediaFiles(mediaFiles);
+
+
         Message savedMessage = this.messageRepository.save(messageEntity);
+
 
         return MessageResponseMapper.toResponse(savedMessage);
     }
