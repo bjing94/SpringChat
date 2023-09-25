@@ -1,8 +1,11 @@
 package org.bjing.chat.profile;
 
 import lombok.AllArgsConstructor;
+import org.bjing.chat.auth.AuthResponse;
+import org.bjing.chat.config.JwtService;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.UserRepository;
+import org.bjing.chat.profile.dto.ProfileConfirmEmailUpdateRequest;
 import org.bjing.chat.profile.dto.ProfileResponse;
 import org.bjing.chat.profile.dto.ProfileUpdateEmailRequest;
 import org.bjing.chat.profile.dto.ProfileUpdateRequest;
@@ -22,6 +25,8 @@ public class ProfileService {
     private final UserRepository userRepository;
 
     private final EmailOtpRepository emailOtpRepository;
+
+    private final JwtService jwtService;
 
     public ProfileResponse getProfile(String userId) {
         Optional<User> optionalUser = this.userRepository.findById(userId);
@@ -55,7 +60,8 @@ public class ProfileService {
         return ProfileResponse.builder().email(user.getEmail()).firstname(user.getFirstname()).lastname(user.getLastname()).build();
     }
 
-    public ProfileResponse confirmEmailUpdate(String userId, String code) {
+    public AuthResponse confirmEmailUpdate(String userId, ProfileConfirmEmailUpdateRequest dto) {
+        String code = dto.getCode();
         Optional<User> optionalUser = this.userRepository.findById(userId);
         if (optionalUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get profile");
         User user = optionalUser.get();
@@ -70,6 +76,7 @@ public class ProfileService {
         user.setEmail(emailOtp.getNewEmail());
         this.userRepository.save(user);
 
-        return ProfileResponse.builder().email(user.getEmail()).firstname(user.getFirstname()).lastname(user.getLastname()).build();
+        String token = this.jwtService.generateToken(user);
+        return AuthResponse.builder().token(token).build();
     }
 }
