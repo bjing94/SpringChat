@@ -2,6 +2,7 @@ package org.bjing.chat.profile;
 
 import lombok.AllArgsConstructor;
 import org.bjing.chat.auth.AuthResponse;
+import org.bjing.chat.common.CodeGenerator;
 import org.bjing.chat.config.JwtService;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.UserRepository;
@@ -14,6 +15,7 @@ import org.bjing.chat.redis.EmailOtpRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -49,13 +51,25 @@ public class ProfileService {
         return ProfileResponse.builder().email(user.getEmail()).firstname(user.getFirstname()).lastname(user.getLastname()).build();
     }
 
+    public ProfileResponse updateAvatar(String userId, MultipartFile file) {
+        Optional<User> optionalUser = this.userRepository.findById(userId);
+        if (optionalUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get profile");
+        User user = optionalUser.get();
+
+
+        this.userRepository.save(user);
+
+        return ProfileResponse.builder().email(user.getEmail()).firstname(user.getFirstname()).lastname(user.getLastname()).build();
+    }
+
     public ProfileResponse updateEmail(String userId, ProfileUpdateEmailRequest dto) {
         Optional<User> optionalUser = this.userRepository.findById(userId);
         if (optionalUser.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get profile");
         User user = optionalUser.get();
 
-//       TODO: Set some key to redis etc
-        this.emailOtpRepository.save(new EmailOtp(user.getEmail(), "122-122", dto.getEmail()));
+        String otpCode = CodeGenerator.generateOtpCode();
+
+        this.emailOtpRepository.save(new EmailOtp(user.getEmail(), otpCode, dto.getEmail()));
 
         return ProfileResponse.builder().email(user.getEmail()).firstname(user.getFirstname()).lastname(user.getLastname()).build();
     }

@@ -3,6 +3,9 @@ package org.bjing.chat.chat;
 import lombok.AllArgsConstructor;
 import org.bjing.chat.chat.dto.*;
 import org.bjing.chat.chat.mapper.MessageResponseMapper;
+import org.bjing.chat.common.PaginationMeta;
+import org.bjing.chat.common.PaginationRequest;
+import org.bjing.chat.common.PaginationResponse;
 import org.bjing.chat.db.entity.Chat;
 import org.bjing.chat.db.entity.Media;
 import org.bjing.chat.db.entity.Message;
@@ -13,6 +16,8 @@ import org.bjing.chat.db.repository.MessageRepository;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.file.FileCreatedResponse;
 import org.bjing.chat.file.FileService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,10 +77,6 @@ public class ChatService {
                 .creatorId(chat.getCreator().getId())
                 .userIds(chat.getUsers().stream().map(User::getId).collect(Collectors.toSet()))
                 .mediaFiles(chat.getMediaFiles())
-                .messages(chat.getMessages()
-                        .stream()
-                        .map(MessageResponseMapper::toResponse)
-                        .collect(Collectors.toSet()))
                 .created(chat.getCreated())
                 .updated(chat.getUpdated())
                 .build();
@@ -129,6 +130,17 @@ public class ChatService {
 
 
         return MessageResponseMapper.toResponse(savedMessage);
+    }
+
+    public PaginationResponse<Set<MessageCreatedResponse>> getChatMessages(String userId, String chatId, PaginationRequest pagination) {
+        PageRequest pageRequest = PageRequest.of(pagination.getPage(), pagination.getPageSize());
+        Page<Message> messages = this.messageRepository.findAllByChatId(chatId, pageRequest);
+
+        return new PaginationResponse<Set<MessageCreatedResponse>>(messages.getContent()
+                .stream()
+                .map(MessageResponseMapper::toResponse)
+                .collect(Collectors.toSet()),
+                new PaginationMeta(messages.getPageable().getPageNumber(), messages.getPageable().getPageSize(), messages.getTotalPages()));
     }
 
     private void checkChatAccess(Chat chat, String userId) {

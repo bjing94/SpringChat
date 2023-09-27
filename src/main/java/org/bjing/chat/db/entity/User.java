@@ -53,6 +53,10 @@ public class User implements UserDetails {
     @Column(name = "updated")
     private Date updated;
 
+    @OneToOne
+    @JoinColumn(name = "avatar_id", referencedColumnName = "id", nullable = true)
+    private Media avatar;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

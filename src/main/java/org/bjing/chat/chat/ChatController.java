@@ -3,6 +3,8 @@ package org.bjing.chat.chat;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.bjing.chat.chat.dto.*;
+import org.bjing.chat.common.PaginationRequest;
+import org.bjing.chat.common.PaginationResponse;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.file.FileCreatedResponse;
 import org.bjing.chat.file.FileService;
@@ -10,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("/chat")
@@ -44,5 +48,13 @@ public class ChatController {
                                                               Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(this.chatService.sendMessage(new MessageCreateDto(user.getId(), id, request.getContent(), file)));
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<PaginationResponse<Set<MessageCreatedResponse>>> getChatMessages(@PathVariable("id") String id,
+                                                                                           PaginationRequest pagination,
+                                                                                           Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(this.chatService.getChatMessages(user.getId(), id, pagination));
     }
 }

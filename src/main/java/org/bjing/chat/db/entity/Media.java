@@ -33,6 +33,9 @@ public class Media {
     @JsonIgnore
     private Chat chat;
 
+    @OneToOne(mappedBy = "avatar")
+    private  User user;
+
     @CreationTimestamp
     @Column(name = "created",nullable = false,updatable = false)
     private Date created;

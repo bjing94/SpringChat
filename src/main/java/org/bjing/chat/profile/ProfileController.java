@@ -10,6 +10,7 @@ import org.bjing.chat.profile.dto.ProfileUpdateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/profile")
@@ -27,6 +28,13 @@ public class ProfileController {
     public ResponseEntity<ProfileResponse> updateProfile(@RequestBody ProfileUpdateRequest dto, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(this.profileService.updateProfile(user.getId(), dto));
+    }
+
+    @PatchMapping("/avatar")
+    public ResponseEntity<ProfileResponse> updateProfile( Authentication authentication,
+                                                         @RequestParam("file") MultipartFile file) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(this.profileService.updateAvatar(user.getId(), file));
     }
 
 
