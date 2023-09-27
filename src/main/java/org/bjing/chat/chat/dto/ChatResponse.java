@@ -23,8 +23,6 @@ public class ChatResponse {
 
     private Set<Media> mediaFiles;
 
-    private Set<MessageCreatedResponse> messages;
-
     private Date created;
 
 
