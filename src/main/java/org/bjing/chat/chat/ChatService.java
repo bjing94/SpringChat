@@ -1,6 +1,6 @@
 package org.bjing.chat.chat;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.bjing.chat.chat.dto.*;
 import org.bjing.chat.chat.mapper.MessageResponseMapper;
 import org.bjing.chat.common.PaginationMeta;
@@ -11,11 +11,11 @@ import org.bjing.chat.db.entity.Media;
 import org.bjing.chat.db.entity.Message;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.ChatRepository;
-import org.bjing.chat.db.repository.MediaRepository;
 import org.bjing.chat.db.repository.MessageRepository;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.file.FileCreatedResponse;
 import org.bjing.chat.file.FileService;
+import org.bjing.chat.kafka.producer.KafkaProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -27,16 +27,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ChatService {
-    private ChatRepository chatRepository;
-    private UserRepository userRepository;
+    private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
 
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
-    private MediaRepository mediaRepository;
+    private final FileService fileService;
 
-    private FileService fileService;
+    private final KafkaProducer kafkaProducer;
 
     public ChatCreateResponse create(ChatCreateRequest request, String creatorUUID) {
         List<String> userIds = request.getUserIds();
@@ -58,8 +58,12 @@ public class ChatService {
                 .build();
 
         Chat newChat = this.chatRepository.save(chat);
-        return ChatCreateResponse.builder().creatorId(creatorUUID.toString())
+
+
+        ChatCreateResponse response = ChatCreateResponse.builder().creatorId(creatorUUID.toString())
                 .userIds(userIds).id(newChat.getId()).build();
+        this.kafkaProducer.sendChatCreatedMessage(response);
+        return response;
     }
 
     public ChatResponse get(String chatUUID, String userUUID) {
@@ -86,7 +90,7 @@ public class ChatService {
         String chatId = dto.getChatId();
         String userId = dto.getUserId();
         String content = dto.getContent();
-        MultipartFile file = dto.getFile();
+        Optional<MultipartFile> fileOptional = dto.getFile();
 
         Optional<Chat> optionalChat = this.chatRepository.findById(chatId);
         Optional<User> optionalUser = this.userRepository.findById(userId);
@@ -111,16 +115,20 @@ public class ChatService {
                 .content(content)
                 .build();
 
-        if (!file.isEmpty()) {
-            FileCreatedResponse data = this.fileService.saveFileLocally(file);
+        if (fileOptional.isPresent()) {
+            MultipartFile file = fileOptional.get();
 
-            Media media = Media.builder()
-                    .link(data.getLink())
-                    .chat(chat)
-                    .message(messageEntity)
-                    .build();
+            if (!file.isEmpty()) {
+                FileCreatedResponse data = this.fileService.saveFileLocally(file);
 
-            mediaFiles.add(media);
+                Media media = Media.builder()
+                        .link(data.getLink())
+                        .chat(chat)
+                        .message(messageEntity)
+                        .build();
+
+                mediaFiles.add(media);
+            }
         }
 
         messageEntity.setMediaFiles(mediaFiles);
@@ -129,7 +137,11 @@ public class ChatService {
         Message savedMessage = this.messageRepository.save(messageEntity);
 
 
-        return MessageResponseMapper.toResponse(savedMessage);
+        MessageCreatedResponse messageCreatedResponse = MessageResponseMapper.toResponse(savedMessage);
+
+        this.kafkaProducer.sendMessageSentMessage(messageCreatedResponse);
+
+        return messageCreatedResponse;
     }
 
     public PaginationResponse<Set<MessageCreatedResponse>> getChatMessages(String userId, String chatId, PaginationRequest pagination) {

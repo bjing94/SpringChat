@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -47,7 +48,7 @@ public class ChatController {
                                                               @RequestParam(value = "file", required = false) MultipartFile file,
                                                               Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(this.chatService.sendMessage(new MessageCreateDto(user.getId(), id, request.getContent(), file)));
+        return ResponseEntity.ok(this.chatService.sendMessage(new MessageCreateDto(user.getId(), id, request.getContent(), Optional.ofNullable(file))));
     }
 
     @GetMapping("/{id}/messages")
