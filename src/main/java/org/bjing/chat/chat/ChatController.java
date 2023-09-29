@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.bjing.chat.chat.dto.*;
 import org.bjing.chat.common.PaginationRequest;
 import org.bjing.chat.common.PaginationResponse;
+import org.bjing.chat.db.entity.Chat;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.file.FileCreatedResponse;
 import org.bjing.chat.file.FileService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +25,17 @@ public class ChatController {
 
     private final FileService fileService;
     private final ChatService chatService;
+
+    @GetMapping()
+    public void findChats(@Valid ChatFindRequest filter) {
+        this.chatService.find(filter);
+    }
+
+    @GetMapping("/longest")
+    public ResponseEntity<PaginationResponse<List<Chat>>> getChatWithMostMessages(@RequestParam("limit") Integer limit, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(this.chatService.findChatsLimitByMessages(limit));
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ChatResponse> get(@PathVariable("id") String id, Authentication authentication) {
