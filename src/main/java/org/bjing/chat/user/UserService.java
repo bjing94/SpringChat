@@ -1,9 +1,9 @@
 package org.bjing.chat.user;
 
 import lombok.AllArgsConstructor;
-import org.bjing.chat.common.PaginationMeta;
-import org.bjing.chat.common.PaginationRequest;
-import org.bjing.chat.common.PaginationResponse;
+import org.bjing.chat.common.dto.PaginationMeta;
+import org.bjing.chat.common.dto.PaginationRequest;
+import org.bjing.chat.common.dto.PaginationResponse;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.user.dto.UserResponse;

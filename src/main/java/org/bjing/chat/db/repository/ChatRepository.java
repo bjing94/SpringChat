@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,4 +20,6 @@ public interface ChatRepository extends JpaRepository<Chat, String> {
     @Query("SELECT c FROM chat c WHERE size(c.messages) > :limit ORDER BY size(c.messages) DESC")
     Page<Chat> findLimitByMessages(@Param("limit") Integer limit, Pageable page);
 
+    @Query("SELECT c FROM chat c JOIN users u WHERE u.id = :userId")
+    List<Chat> findChatsByUserId(@Param("userId") String userId);
 }

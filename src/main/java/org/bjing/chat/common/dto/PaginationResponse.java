@@ -1,4 +1,4 @@
-package org.bjing.chat.common;
+package org.bjing.chat.common.dto;
 
 import lombok.Value;
 
