@@ -1,7 +1,9 @@
 package org.bjing.chat.auth;
 
 import lombok.RequiredArgsConstructor;
-import org.bjing.chat.config.JwtService;
+import org.bjing.chat.auth.dto.AuthRequestDto;
+import org.bjing.chat.auth.dto.RegisterRequestDto;
+import org.bjing.chat.config.auth.JwtService;
 import org.bjing.chat.db.entity.Role;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.UserRepository;
@@ -40,5 +42,9 @@ public class AuthService {
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder().token(jwtToken).build();
+    }
+
+    public void authOauth(){
+//        new A
     }
 }

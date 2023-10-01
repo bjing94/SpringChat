@@ -2,15 +2,18 @@ package org.bjing.chat.chat;
 
 import lombok.RequiredArgsConstructor;
 import org.bjing.chat.chat.dto.*;
+import org.bjing.chat.chat.mapper.ChatResponseMapper;
 import org.bjing.chat.chat.mapper.MessageResponseMapper;
-import org.bjing.chat.common.PaginationMeta;
-import org.bjing.chat.common.PaginationRequest;
-import org.bjing.chat.common.PaginationResponse;
+import org.bjing.chat.common.dto.PaginationMeta;
+import org.bjing.chat.common.dto.PaginationRequest;
+import org.bjing.chat.common.dto.PaginationResponse;
+import org.bjing.chat.db.dto.ChatFindFilter;
 import org.bjing.chat.db.entity.Chat;
 import org.bjing.chat.db.entity.Media;
 import org.bjing.chat.db.entity.Message;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.ChatRepository;
+import org.bjing.chat.db.repository.custom.CustomChatRepository;
 import org.bjing.chat.db.repository.MessageRepository;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.file.FileCreatedResponse;
@@ -37,6 +40,8 @@ public class ChatService {
     private final FileService fileService;
 
     private final KafkaProducer kafkaProducer;
+
+    private final CustomChatRepository customChatRepository;
 
     public ChatCreateResponse create(ChatCreateRequest request, String creatorUUID) {
         List<String> userIds = request.getUserIds();
@@ -84,6 +89,15 @@ public class ChatService {
                 .created(chat.getCreated())
                 .updated(chat.getUpdated())
                 .build();
+    }
+
+    public PaginationResponse<List<Chat>> findChatsLimitByMessages(Integer limit) {
+        Page<Chat> chatPage = this.chatRepository.findLimitByMessages(limit, PageRequest.of(0, 10));
+        List<Chat> chatList = chatPage.getContent();
+
+        List<Chat> chatList1 = this.customChatRepository.find(null);
+        System.out.println(chatList1.size() + " : " + chatList.size());
+        return new PaginationResponse(chatList, new PaginationMeta(chatPage.getNumber(), chatPage.getSize(), chatPage.getTotalPages()));
     }
 
     public MessageCreatedResponse sendMessage(MessageCreateDto dto) {
@@ -162,5 +176,16 @@ public class ChatService {
         if (userInChat.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not in chat!");
         }
+    }
+
+    public List<Chat> find(ChatFindRequest request) {
+        ChatFindFilter findFilter = new ChatFindFilter(request.getMessageLimit(), request.getUserId(), request.getFromDate(), request.getToDate());
+        List<Chat> chats = this.customChatRepository.find(findFilter);
+        System.out.println(chats.size());
+        return chats;
+    }
+
+    public List<ChatResponse> findUserChats(String userId) {
+        return this.chatRepository.findChatsByUserId(userId).stream().map(ChatResponseMapper::map).collect(Collectors.toList());
     }
 }

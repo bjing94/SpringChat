@@ -1,4 +1,4 @@
-package org.bjing.chat.auth;
+package org.bjing.chat.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

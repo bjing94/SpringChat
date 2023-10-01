@@ -1,8 +1,8 @@
 package org.bjing.chat.user;
 
 import lombok.AllArgsConstructor;
-import org.bjing.chat.common.PaginationRequest;
-import org.bjing.chat.common.PaginationResponse;
+import org.bjing.chat.common.dto.PaginationRequest;
+import org.bjing.chat.common.dto.PaginationResponse;
 import org.bjing.chat.user.dto.UserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
