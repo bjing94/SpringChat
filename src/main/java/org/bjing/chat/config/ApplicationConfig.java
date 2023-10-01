@@ -1,6 +1,7 @@
 package org.bjing.chat.config;
 
 import lombok.RequiredArgsConstructor;
+import org.bjing.chat.config.auth.CustomDaoAuthProvider;
 import org.bjing.chat.user.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,22 +27,19 @@ import java.time.Duration;
 @EnableJpaAuditing
 @RequiredArgsConstructor
 public class ApplicationConfig {
-
+    //    Spring auth manager required to check auths
     private final MyUserDetailsService myUserDetailsService;
 
-    //    Auth provider to get data from db
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(this.myUserDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
+        return new CustomDaoAuthProvider(myUserDetailsService,passwordEncoder());
     }
 
-    //    Spring auth manager required to check auths
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.authenticationProvider(authenticationProvider());
+        return builder.build();
     }
 
     // Application password encoder
@@ -47,15 +47,6 @@ public class ApplicationConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-//    @Bean
-//    public JedisConnectionFactory redisConnectionFactory() {
-//        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-//        JedisClientConfigurationBuilder jedisClientConfiguration = JedisClientConfiguration.builder();
-//        jedisClientConfiguration.connectTimeout(Duration.ofSeconds(60));// 60s connection timeout
-//
-//        return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration.build());
-//    }
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
@@ -66,7 +57,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(){
+    public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
         return template;

@@ -58,31 +58,4 @@ public class ProfileController {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(this.profileService.getUserChats(user.getId()));
     }
-
-    @PostMapping("/friends/request")
-    public ResponseEntity<FriendRequestCreatedResponse> sendFriendRequest(@RequestBody @Valid FriendRequestCreateRequest data, Authentication authentication
-
-    ) {
-        User user = (User) authentication.getPrincipal();
-        System.out.println(data);
-        return ResponseEntity.ok(this.profileService.sendFriendRequest(user.getId(), data.getUserId()));
-    }
-
-    @PostMapping("/friends/request/accept")
-    public ResponseEntity<FriendRequestCreatedResponse> acceptFriendRequest(@RequestBody @Valid FriendRequestCreateRequest data, Authentication authentication
-
-    ) {
-        User user = (User) authentication.getPrincipal();
-        System.out.println(data);
-        return ResponseEntity.ok(this.profileService.sendFriendRequest(user.getId(), data.getUserId()));
-    }
-
-    @PostMapping("/friends/request/decline")
-    public ResponseEntity<FriendRequestCreatedResponse> declineFriendRequest(@RequestBody @Valid FriendRequestCreateRequest data, Authentication authentication
-
-    ) {
-        User user = (User) authentication.getPrincipal();
-        System.out.println(data);
-        return ResponseEntity.ok(this.profileService.sendFriendRequest(user.getId(), data.getUserId()));
-    }
 }

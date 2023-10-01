@@ -13,7 +13,7 @@ import org.bjing.chat.db.entity.Media;
 import org.bjing.chat.db.entity.Message;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.ChatRepository;
-import org.bjing.chat.db.repository.CustomChatRepository;
+import org.bjing.chat.db.repository.custom.CustomChatRepository;
 import org.bjing.chat.db.repository.MessageRepository;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.file.FileCreatedResponse;

@@ -1,4 +1,4 @@
-package org.bjing.chat.profile.dto;
+package org.bjing.chat.friends.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;

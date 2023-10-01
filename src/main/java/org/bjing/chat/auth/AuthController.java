@@ -1,6 +1,8 @@
 package org.bjing.chat.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.bjing.chat.auth.dto.AuthRequestDto;
+import org.bjing.chat.auth.dto.RegisterRequestDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

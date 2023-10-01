@@ -1,4 +1,4 @@
-package org.bjing.chat.db.repository;
+package org.bjing.chat.db.repository.custom;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

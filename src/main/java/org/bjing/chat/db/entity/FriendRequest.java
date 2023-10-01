@@ -14,7 +14,7 @@ import org.bjing.chat.common.enums.FriendRequestStatus;
 @Entity(name = "friend_request")
 public class FriendRequest {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     Long id;
 
     @ManyToOne()

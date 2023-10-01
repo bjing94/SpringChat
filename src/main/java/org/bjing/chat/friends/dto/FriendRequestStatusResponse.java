@@ -1,4 +1,4 @@
-package org.bjing.chat.profile.dto;
+package org.bjing.chat.friends.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import org.bjing.chat.common.enums.FriendRequestStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FriendRequestCreatedResponse {
+public class FriendRequestStatusResponse {
     Long id;
     FriendRequestStatus status;
 }
