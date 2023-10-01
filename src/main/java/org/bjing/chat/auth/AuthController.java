@@ -34,12 +34,11 @@ public class AuthController {
     }
 
     @GetMapping("/oauth2/github")
-    public void authGithub(
+    public AuthResponse authGithub(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "error_description", required = false) String errorDescription,
             @RequestParam(value = "code", required = false) String code
     ) {
-        this.service.authOauthGit(code);
-//        return ResponseEntity.ok(service.auth(request));
+        return this.service.authOauthGit(code);
     }
 }
