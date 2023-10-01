@@ -1,6 +1,7 @@
 package org.bjing.chat.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.bjing.chat.adapter.GithubAuthService;
 import org.bjing.chat.auth.dto.AuthRequestDto;
 import org.bjing.chat.auth.dto.RegisterRequestDto;
 import org.bjing.chat.config.auth.JwtService;
@@ -20,6 +21,8 @@ public class AuthService {
     private final JwtService jwtService;
 
     private final AuthenticationManager authenticationManager;
+
+    private final GithubAuthService githubAuthService;
 
     public AuthResponse auth(AuthRequestDto request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
@@ -44,7 +47,14 @@ public class AuthService {
         return AuthResponse.builder().token(jwtToken).build();
     }
 
-    public void authOauth(){
-//        new A
+    public void authOauthGit(String code) {
+//        Authenticate using oauth2
+        String token = this.githubAuthService.getAccessToken(code);
+        if (token.isEmpty()) return;
+
+
+//        Create jwt token
+//        Return jwt token
+
     }
 }

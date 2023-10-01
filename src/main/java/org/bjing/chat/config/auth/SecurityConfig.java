@@ -23,7 +23,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
-                .authorizeHttpRequests(configurer -> configurer.requestMatchers("/", "/auth/register", "/auth/login", "/chat/image").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(configurer -> configurer.requestMatchers("/", "/auth/register", "/auth/login", "/chat/image", "/auth/**").permitAll().anyRequest().authenticated())
+                .oauth2Login(configurer -> configurer
+                        .defaultSuccessUrl("/auth/oauth2/github")
+                )
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
