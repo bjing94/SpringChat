@@ -5,7 +5,7 @@ import org.bjing.chat.auth.AuthResponse;
 import org.bjing.chat.chat.ChatService;
 import org.bjing.chat.chat.dto.ChatResponse;
 import org.bjing.chat.common.CodeGenerator;
-import org.bjing.chat.config.auth.JwtService;
+import org.bjing.chat.jwt.JwtService;
 import org.bjing.chat.db.entity.User;
 import org.bjing.chat.db.repository.UserRepository;
 import org.bjing.chat.profile.dto.*;
