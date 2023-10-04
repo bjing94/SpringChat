@@ -1,4 +1,4 @@
-package org.bjing.chat.config.auth;
+package org.bjing.chat.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
